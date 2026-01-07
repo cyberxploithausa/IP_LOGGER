@@ -1,55 +1,55 @@
 #!/usr/bin/env python3
 
 import argparse
-import sys
-from geoip2.database import Reader
-from geoip2.errors import AddressNotFoundError
+import requests
+
+APIS = [
+    ("ipwho", "https://api.ipwho.org/ip/{ip}"),
+    ("ip-api", "http://ip-api.com/json/{ip}"),
+    ("reallyfreegeoip", "https://reallyfreegeoip.org/json/{ip}"),
+    ("techniknews", "https://api.techniknews.net/ipgeo/{ip}"),
+    ("geojs", "https://get.geojs.io/v1/ip/geo.json?ip={ip}"),
+    ("apip", "https://apip.cc/api-json/{ip}"),
+]
 
 
-def lookup_ip(ip: str, db_path: str) -> None:
-    try:
-        with Reader(db_path) as reader:
-            response = reader.city(ip)
+def geo_lookup(ip: str) -> None:
+    print(f"\n[+] Running GeoIP lookup for {ip}")
+    print("=" * 50)
 
-            result = {
-                "IP Address": ip,
-                "Country": response.country.name,
-                "Country Code": response.country.iso_code,
-                "City": response.city.name,
-                "Region": response.subdivisions.most_specific.name,
-                "Postal Code": response.postal.code,
-                "Latitude": response.location.latitude,
-                "Longitude": response.location.longitude,
-                "Time Zone": response.location.time_zone,
-            }
+    for name, url in APIS:
+        print(f"\n[*] Querying {name}")
+        print("-" * 40)
 
-            print("\n[+] GeoIP Lookup Result\n" + "-" * 30)
-            for key, value in result.items():
-                print(f"{key:<15}: {value}")
+        try:
+            r = requests.get(url.format(ip=ip), timeout=5)
+            r.raise_for_status()
 
-    except AddressNotFoundError:
-        print(f"[-] No geolocation data found for {ip}")
-    except FileNotFoundError:
-        print(f"[-] Database not found: {db_path}")
-    except Exception as e:
-        print(f"[!] Error: {e}")
-        sys.exit(1)
+            data = r.json()
+
+            if not isinstance(data, dict):
+                print("[-] Unexpected response format")
+                continue
+
+            for k, v in data.items():
+                print(f"{k:<15}: {v}")
+
+        except requests.exceptions.RequestException as e:
+            print(f"[-] Request failed: {e}")
+        except ValueError:
+            print("[-] Invalid JSON response")
+        except Exception as e:
+            print(f"[-] Error: {e}")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Professional GeoIP lookup using MaxMind GeoLite2"
+        description="Run multiple no-key GeoIP APIs against a single IP"
     )
     parser.add_argument("ip", help="Target IP address")
-    parser.add_argument(
-        "-d",
-        "--database",
-        default="GeoLite2-City.mmdb",
-        help="Path to GeoLite2-City.mmdb",
-    )
 
     args = parser.parse_args()
-    lookup_ip(args.ip, args.database)
+    geo_lookup(args.ip)
 
 
 if __name__ == "__main__":
