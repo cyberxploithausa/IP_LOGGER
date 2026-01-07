@@ -8,10 +8,9 @@ APIS = [
     #("ipwho", "https://api.ipwho.org/ip/{ip}"),
     ("ip-api", "http://ip-api.com/json/{ip}"),
     ("reallyfreegeoip", "https://reallyfreegeoip.org/json/{ip}"),
-    ("techniknews", "https://api.techniknews.net/ipgeo/{ip}"),
     #Broke ah api end point response dont wanna fix it
     #("geojs", "https://get.geojs.io/v1/ip/geo.json?ip={ip}"),
-    ("apip", "https://apip.cc/api-json/{ip}"),
+    ("apip", "https://apip.cc/api-json/{ip}")
 ]
 
 
