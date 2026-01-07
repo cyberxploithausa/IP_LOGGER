@@ -4,7 +4,8 @@ import argparse
 import requests
 
 APIS = [
-    ("ipwho", "https://api.ipwho.org/ip/{ip}"),
+    #requires an api key
+    #("ipwho", "https://api.ipwho.org/ip/{ip}"),
     ("ip-api", "http://ip-api.com/json/{ip}"),
     ("reallyfreegeoip", "https://reallyfreegeoip.org/json/{ip}"),
     ("techniknews", "https://api.techniknews.net/ipgeo/{ip}"),
